@@ -21,3 +21,21 @@ Ensure you have the following installed on your system:
 
 ## Setup Instructions
 
+Build the project using the following commands:
+
+```bash
+cmake -S . -B build
+cmake --build build
+```
+
+Run the progrem:
+
+```bash
+./build/myjoin a.csv b.csv c.csv d.csv
+```
+
+Run tests:
+
+```bash
+./build/myjoin_test
+```
