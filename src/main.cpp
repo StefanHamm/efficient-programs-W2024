@@ -4,6 +4,8 @@
 #include <vector>
 #include <algorithm>
 #include <iterator>
+//include self written joiner
+#include "joiner.h"
 
 
 //main function which uses 4 path as arguments and calls the join funciton
@@ -21,9 +23,9 @@ int main(int argc, char *argv[])
     std::string path3 = argv[3];
     std::string path4 = argv[4];
 
-    std::string result = join(path1, path2, path3, path4);
+    int result = join(path1, path2, path3, path4);
 
-    std::cout << result << std::endl;
+    //std::cout << result << std::endl;
 
     return 0;
 }

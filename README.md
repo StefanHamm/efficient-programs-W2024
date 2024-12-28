@@ -4,25 +4,38 @@ The dataset can be downloaded from the URL above.
 
 Call the reference implementation as follows:
 
-```bash
-./scripts/myjoin a.csv b.csv c.csv d.csv
+```bash	
+clone this repository to the server
+cd efficient-programs-WS2024
 ```
-Get performance stats like this:
+
+Everything is configured in the makefile. To make the reference implementation, run:
 
 ```bash
-LC_NUMERIC=en_US
-perf stat -e cycles ./scripts/myjoin a.csv b.csv c.csv d.csv |cat > /dev/null
+make
 ```
-Why cat?
-So you dont cheat i guess. Didnt understand prof completely.
 
-How to check if the result is working correctly (ertl):
+To run the the test on small data, run:
 
 ```bash
-./scripts/myjoin a.csv b.csv c.csv d.csv |sort|diff - output.csv
+make testsmall
 ```
-I guess calculating a checksum should also work:
+
+To run the the test on large data, run:
 
 ```bash
-./scripts/myjoin a.csv b.csv c.csv d.csv |sha256sum
+make testbig
+
+```
+
+To run a sanity test with the reference implementation, run:
+
+```bash
+make sanitytest
+```
+
+To get performance data, run:
+
+```bash
+make perf
 ```
