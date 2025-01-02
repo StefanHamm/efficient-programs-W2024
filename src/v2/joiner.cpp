@@ -92,6 +92,7 @@ int hashJoin(const std::string& path1, const std::string& path2, const std::stri
     return 0;
 }
 
-int join(const std::string& path1, const std::string& path2, const std::string& path3, const std::string& path4) {
-    return hashJoin(path1, path2, path3, path4);
+int join(const std::string path1, const std::string path2, const std::string path3, const std::string path4) {
+    int code = hashJoin(path1, path2, path3, path4);
+    return code;
 }
