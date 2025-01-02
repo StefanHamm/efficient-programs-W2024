@@ -27,7 +27,7 @@ int hashJoin(const std::string& path1, const std::string& path2, const std::stri
         std::istringstream iss(line);
         std::string A, B;
         if (std::getline(iss, A, ',') && std::getline(iss, B)) {
-            table1[A].Bs.push_back(B);
+            table1[A].Bs.insert(B);
         }
     }
 
@@ -41,7 +41,7 @@ int hashJoin(const std::string& path1, const std::string& path2, const std::stri
         std::istringstream iss(line);
         std::string A, C;
         if (std::getline(iss, A, ',') && std::getline(iss, C)) {
-            table1[A].Cs.push_back(C);
+            table1[A].Cs.insert(C);
         }
     }
 
@@ -55,7 +55,7 @@ int hashJoin(const std::string& path1, const std::string& path2, const std::stri
         std::istringstream iss(line);
         std::string A, D;
         if (std::getline(iss, A, ',') && std::getline(iss, D)) {
-            table3[A].push_back(D);
+            table3[A].insert(D);
         }
     }
 
@@ -69,7 +69,7 @@ int hashJoin(const std::string& path1, const std::string& path2, const std::stri
         std::istringstream iss(line);
         std::string D, E;
         if (std::getline(iss, D, ',') && std::getline(iss, E)) {
-            table4[D].push_back(E);
+            table4[D].insert(E);
         }
     }
 
