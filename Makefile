@@ -6,10 +6,10 @@ CFLAGS = -O3 -Wall -Wextra -std=c++17
 LDFLAGS =
 
 # Project files
-SRC_DIR = src
+SRC_DIR = src/v($(VERSION))
 SRC = $(SRC_DIR)/main.cpp $(SRC_DIR)/utils.cpp $(SRC_DIR)/joiner.cpp
 OBJ = $(SRC:.cpp=.o)
-TARGET = myjoin
+TARGET = myjoin_v$(VERSION)
 
 # Default target
 all: $(TARGET)
@@ -46,5 +46,9 @@ sanity:
 # Measure performance
 perf: $(TARGET)
 	LC_NUMERIC=en_US perf stat -e cycles ./$(TARGET) $(TEST_BIG_INPUT) | cat >/dev/null
+
+perf-v: $(TARGET)
+	LC_NUMERIC=en_US perf stat -e cycles ./$(TARGET) $(TEST_BIG_INPUT) | cat >/dev/null
+
 
 .PHONY: all clean test perf

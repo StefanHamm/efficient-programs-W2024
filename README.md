@@ -31,7 +31,7 @@ make testbig
 To run a sanity test with the reference implementation, run:
 
 ```bash
-make sanitytest
+make sanity
 ```
 
 To get performance data, run:
