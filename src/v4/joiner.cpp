@@ -91,17 +91,13 @@ int hashJoin(const std::string& path1, const std::string& path2, const std::stri
                     for (const auto& E : Es) {
                         for (const auto& B : entry.Bs) {
                             for (const auto& C : entry.Cs) {
-                                outputBuffer.emplace_back(D + "," + A + "," + B + "," + C + "," + E);
+                                std::cout << D << "," << A << "," << B << "," << C << "," << E << std::endl;
                             }
                         }
                     }
                 }
             }
         }
-    }
-
-    for (const auto& outputLine : outputBuffer) {
-        std::cout << outputLine << std::endl;
     }
 
     return 0;
