@@ -15,10 +15,10 @@ int hashJoin(const std::string& path1, const std::string& path2, const std::stri
     table1.reserve(20000000);
 
     std::unordered_map<std::string, std::vector<std::string>> table3; // Key: A, Values: D's
-    table3.reserve(20000000);
+    table3.reserve(15000000);
 
     std::unordered_map<std::string, std::vector<std::string>> table4; // Key: D, Values: E's
-    table4.reserve(20000000);
+    table4.reserve(15000000);
 
 
     
@@ -35,7 +35,7 @@ int hashJoin(const std::string& path1, const std::string& path2, const std::stri
             A = line.substr(0, delimPos);
             B = line.substr(delimPos + 1);
             if (table1[A].Bs.empty()) {
-                table1[A].Bs.reserve(3000000);
+                table1[A].Bs.reserve(1000000);
             }
             table1[A].Bs.push_back(B);
         }
@@ -55,7 +55,7 @@ int hashJoin(const std::string& path1, const std::string& path2, const std::stri
             A = line.substr(0, delimPos);
             C = line.substr(delimPos + 1);
             if (table1[A].Cs.empty()) {
-                table1[A].Cs.reserve(3000000); // Initial reserve for small Cs
+                table1[A].Cs.reserve(1000000); // Initial reserve for small Cs
             }
             table1[A].Cs.push_back(C);
 
@@ -75,7 +75,7 @@ int hashJoin(const std::string& path1, const std::string& path2, const std::stri
             A = line.substr(0, delimPos);
             D = line.substr(delimPos + 1);
             if (table3[A].empty()) {
-                table3[A].reserve(3000000); // Initial reserve for small Cs
+                table3[A].reserve(1000000); // Initial reserve for small Cs
             }
             table3[A].push_back(D);
         }
@@ -95,7 +95,7 @@ int hashJoin(const std::string& path1, const std::string& path2, const std::stri
             E = line.substr(delimPos + 1);
 
             if (table4[D].empty()) {
-                table4[D].reserve(3000000); // Initial reserve for small Es
+                table4[D].reserve(1000000); // Initial reserve for small Es
             }
             table4[D].push_back(E);
         }
