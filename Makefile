@@ -40,15 +40,11 @@ testbig: $(TARGET)
 	./$(TARGET) $(TEST_BIG_INPUT) | sort | diff - $(TEST_BIG_OUTPUT)
 
 sanity: 
-	./scripts/myjoin $(TEST_SMALL_INPUT) | sort | diff - $(TEST_SMALL_OUTPUT)
-	./scripts/myjoin $(TEST_BIG_INPUT) | sort | diff - $(TEST_BIG_OUTPUT)
+	./$(TARGET) $(TEST_SMALL_INPUT) | sort | diff - $(TEST_SMALL_OUTPUT)
+	./$(TARGET) $(TEST_BIG_INPUT) | sort | diff - $(TEST_BIG_OUTPUT)
 
 # Measure performance
 perf: $(TARGET)
 	LC_NUMERIC=en_US perf stat -e cycles ./$(TARGET) $(TEST_BIG_INPUT) | cat >/dev/null
-
-perf-v: $(TARGET)
-	LC_NUMERIC=en_US perf stat -e cycles ./$(TARGET) $(TEST_BIG_INPUT) | cat >/dev/null
-
 
 .PHONY: all clean test perf
