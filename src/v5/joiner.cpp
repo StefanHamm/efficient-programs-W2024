@@ -29,6 +29,7 @@ int hashJoin(const std::string& path1, const std::string& path2, const std::stri
     table4.reserve(20000000);
 
 
+
     // Read File1 (A,B)
     std::ifstream file1(path1);
     if (!file1.is_open()) {
@@ -52,8 +53,6 @@ int hashJoin(const std::string& path1, const std::string& path2, const std::stri
         parseLine(line, ',', A, C);
         table1[A].Cs.push_back(C);
     }
-
-
 
     // Read File3 (A,D)
     std::ifstream file3(path3);
