@@ -6,14 +6,14 @@
 #include <string>
 
 struct Table1Entry {
-    std::vector<std::string> Bs;
-    std::vector<std::string> Cs;
+    std::unordered_set<std::string> Bs;
+    std::unordered_set<std::string> Cs;
 };
 
 int hashJoin(const std::string& path1, const std::string& path2, const std::string& path3, const std::string& path4) {
     std::unordered_map<std::string, Table1Entry> table1; // Key: A, Values: Bs and Cs
-    std::unordered_map<std::string, std::vector<std::string>> table3; // Key: A, Values: D's
-    std::unordered_map<std::string, std::vector<std::string>> table4; // Key: D, Values: E's
+    std::unordered_map<std::string, std::unordered_set<std::string>> table3; // Key: A, Values: D's
+    std::unordered_map<std::string, std::unordered_set<std::string>> table4; // Key: D, Values: E's
 
     // Read File1 (A,B)
     std::ifstream file1(path1);
