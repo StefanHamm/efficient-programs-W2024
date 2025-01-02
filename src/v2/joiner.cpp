@@ -24,7 +24,7 @@ int hashJoin(const std::string& path1, const std::string& path2, const std::stri
     
     // Read File1 (A,B)
     std::ifstream file1(path1);
-    cout << file1.tellg()
+    std::cout << file1.tellg()
     if (!file1.is_open()) {
         std::cerr << "Error opening File1\n";
         return -1;
@@ -40,7 +40,7 @@ int hashJoin(const std::string& path1, const std::string& path2, const std::stri
 
     // Read File2 (A,C)
     std::ifstream file2(path2);
-    cout << file2.tellg()
+    std::cout << file2.tellg()
     if (!file2.is_open()) {
         std::cerr << "Error opening File2\n";
         return -1;
@@ -55,7 +55,7 @@ int hashJoin(const std::string& path1, const std::string& path2, const std::stri
 
     // Read File3 (A,D)
     std::ifstream file3(path3);
-    cout << file3.tellg()
+    std::cout << file3.tellg()
     if (!file3.is_open()) {
         std::cerr << "Error opening File3\n";
         return -1;
@@ -70,7 +70,7 @@ int hashJoin(const std::string& path1, const std::string& path2, const std::stri
 
     // Read File4 (D,E)
     std::ifstream file4(path4);
-    cout << file4.tellg()
+    std::cout << file4.tellg()
     if (!file4.is_open()) {
         std::cerr << "Error opening File4\n";
         return -1;
