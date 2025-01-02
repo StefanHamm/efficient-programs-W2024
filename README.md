@@ -54,3 +54,9 @@ Then just simply:
 ```bash
 /bin/bash update_from_git.sh
 ```
+
+
+# History
+# v1: Baseline Implementation
+# v2: Reserving space for tables (TH)
+Inserted: table1.reserve(20000000);
