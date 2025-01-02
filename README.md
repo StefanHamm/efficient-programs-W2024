@@ -67,3 +67,5 @@ Improving the loop by reducing the number of find calls
 (I think this is Code motion out of loops)
 # v5: Changing loop order
 Changed the order of the most inner loops.
+# v6: Loop fusion
+Fusion of the loops for reading the files
