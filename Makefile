@@ -6,7 +6,7 @@ CFLAGS = -O3 -Wall -Wextra -std=c++17
 LDFLAGS =
 
 # Project files
-SRC_DIR = src/v($(VERSION))
+SRC_DIR = src/v$(VERSION)
 SRC = $(SRC_DIR)/main.cpp $(SRC_DIR)/utils.cpp $(SRC_DIR)/joiner.cpp
 OBJ = $(SRC:.cpp=.o)
 TARGET = myjoin_v$(VERSION)
