@@ -60,3 +60,6 @@ Then just simply:
 # v1: Baseline Implementation
 # v2: Reserving space for tables (TH)
 Inserted: table1.reserve(20000000);
+# v3: Implemented the parseLine function and optimized stream
+instead of using istringstream we switched to manual line parsing
+# v4: Loop Improvement
