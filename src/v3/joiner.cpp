@@ -19,7 +19,7 @@ int hashJoin(const std::string& path1, const std::string& path2, const std::stri
 
     // Read File1 (A,B)
     std::ifstream file1(path1);
-    table1.reserve(file1.size() * 10)
+    table1.reserve(file1.tellg() * 10 * 2)
     if (!file1.is_open()) {
         std::cerr << "Error opening File1\n";
         return -1;
@@ -49,7 +49,7 @@ int hashJoin(const std::string& path1, const std::string& path2, const std::stri
 
     // Read File3 (A,D)
     std::ifstream file3(path3);
-    table3.reserve(file3.size() * 10)
+    table3.reserve(file3.tellg() * 10)
 
     if (!file3.is_open()) {
         std::cerr << "Error opening File3\n";
@@ -65,7 +65,7 @@ int hashJoin(const std::string& path1, const std::string& path2, const std::stri
 
     // Read File4 (D,E)
     std::ifstream file4(path4);
-    table3.reserve(file4.size() * 10)
+    table3.reserve(file4.tellg() * 10)
 
     if (!file4.is_open()) {
         std::cerr << "Error opening File4\n";
