@@ -74,8 +74,8 @@ int hashJoin(const std::string& path1, const std::string& path2, const std::stri
         if (delimPos != std::string::npos) {
             A = line.substr(0, delimPos);
             D = line.substr(delimPos + 1);
-            if (table1[A].empty()) {
-                table1[A].reserve(3000000); // Initial reserve for small Cs
+            if (table3[A].empty()) {
+                table3[A].reserve(3000000); // Initial reserve for small Cs
             }
             table3[A].push_back(D);
         }
