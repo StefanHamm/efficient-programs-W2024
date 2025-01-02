@@ -60,14 +60,14 @@ Then just simply:
 # v1: Baseline Implementation
 # v2: Reserving space for tables (TH)
 Inserted: table1.reserve(20000000);
-# v3: Implemented the parseLine function and optimized stream
+# v3: Implemented the parseLine function and optimized stream (TH)
 instead of using istringstream we switched to manual line parsing
-# v4: Loop Improvement
+# v4: Loop Improvement (TH)
 Improving the loop by reducing the number of find calls 
 (I think this is Code motion out of loops)
-# v5: Changing loop order
+# v5: Changing loop order (TH)
 Changed the order of the most inner loops.
-# v6: Loop fusion
+# v6: Loop fusion (TH)
 Fusion of the loops for reading the files
-# v7: Loop Unrolling
+# v7: Loop Unrolling (TH)
 Unrolling the loops in the join
