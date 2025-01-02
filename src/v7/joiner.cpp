@@ -66,24 +66,40 @@ int hashJoin(const std::string& path1, const std::string& path2, const std::stri
 
     // Perform the join
     for (const auto& [A, entry] : table1) {
-        auto itTable3 = table3.find(A);
-        if (itTable3 != table3.end()) {
-            const auto& Ds = itTable3->second;
-            for (const auto& D : Ds) {
-                auto itTable4 = table4.find(D);
-                if (itTable4 != table4.end()) {
-                    const auto& Es = itTable4->second;
-                    for (const auto& B : entry.Bs) {
-                        for (const auto& C : entry.Cs) {
-                            for (const auto& E : Es) {
-                                std::cout << D << "," << A << "," << B << "," << C << "," << E << std::endl;
-                            }
+    auto itTable3 = table3.find(A);
+    if (itTable3 != table3.end()) {
+        const auto& Ds = itTable3->second;
+        for (const auto& D : Ds) {
+            auto itTable4 = table4.find(D);
+            if (itTable4 != table4.end()) {
+                const auto& Es = itTable4->second;
+                // Unroll the loops for Bs and Cs (assuming even number of elements in each)
+                size_t sizeB = entry.Bs.size();
+                size_t sizeC = entry.Cs.size();
+
+                // Unrolling Bs and Cs
+                for (size_t i = 0; i < sizeB; i += 2) {
+                    // Process two elements from Bs
+                    for (size_t j = 0; j < sizeC; j += 2) {
+                        std::cout << D << "," << A << "," << entry.Bs[i] << "," << entry.Cs[j] << "," << Es[0] << std::endl;
+                        if (i + 1 < sizeB && j + 1 < sizeC) {
+                            std::cout << D << "," << A << "," << entry.Bs[i + 1] << "," << entry.Cs[j + 1] << "," << Es[0] << std::endl;
+                        }
+                    }
+                }
+
+                // Fallback if the size of Bs or Cs is odd
+                if (sizeB % 2 != 0 || sizeC % 2 != 0) {
+                    for (size_t i = sizeB - (sizeB % 2); i < sizeB; i++) {
+                        for (size_t j = sizeC - (sizeC % 2); j < sizeC; j++) {
+                            std::cout << D << "," << A << "," << entry.Bs[i] << "," << entry.Cs[j] << "," << Es[0] << std::endl;
                         }
                     }
                 }
             }
         }
     }
+}
 
     return 0;
 }

@@ -69,3 +69,5 @@ Improving the loop by reducing the number of find calls
 Changed the order of the most inner loops.
 # v6: Loop fusion
 Fusion of the loops for reading the files
+# v7: Loop Unrolling
+Unrolling the loops in the join
