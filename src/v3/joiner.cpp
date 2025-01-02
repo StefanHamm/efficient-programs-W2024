@@ -44,7 +44,6 @@ int hashJoin(const std::string& path1, const std::string& path2, const std::stri
 
     // Read File2 (A,C)
     std::ifstream file2(path2);
-    std::string C;
     if (!file2.is_open()) {
         std::cerr << "Error opening File2\n";
         return -1;
