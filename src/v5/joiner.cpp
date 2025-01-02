@@ -79,7 +79,6 @@ int hashJoin(const std::string& path1, const std::string& path2, const std::stri
     }
 
     // Perform the join
-    std::vector<std::string> outputBuffer;
     for (const auto& [A, entry] : table1) {
         auto itTable3 = table3.find(A);
         if (itTable3 != table3.end()) {
@@ -88,9 +87,9 @@ int hashJoin(const std::string& path1, const std::string& path2, const std::stri
                 auto itTable4 = table4.find(D);
                 if (itTable4 != table4.end()) {
                     const auto& Es = itTable4->second;
-                    for (const auto& E : Es) {
-                        for (const auto& B : entry.Bs) {
-                            for (const auto& C : entry.Cs) {
+                    for (const auto& B : entry.Bs) {
+                        for (const auto& C : entry.Cs) {
+                            for (const auto& E : entry.Es) {
                                 std::cout << D << "," << A << "," << B << "," << C << "," << E << std::endl;
                             }
                         }
