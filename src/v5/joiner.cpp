@@ -32,24 +32,18 @@ int hashJoin(const std::string& path1, const std::string& path2, const std::stri
     
     // Read File1 (A,B)
     std::ifstream file1(path1);
-    if (!file1.is_open()) {
-        std::cerr << "Error opening File1\n";
-        return -1;
-    }
-    std::string line, A, B;
-    while (std::getline(file1, line)) {
-        parseLine(line, ',', A, B);
-        table1[A].Bs.push_back(B);
-    }
-
     // Read File2 (A,C)
     std::ifstream file2(path2);
-    if (!file2.is_open()) {
-        std::cerr << "Error opening File2\n";
+
+    if (!file1.is_open() || !file2.is_open()) {
+        std::cerr << "Error opening File1 or File2\n";
         return -1;
     }
-    std::string C;
-    while (std::getline(file2, line)) {
+    std::string line, A, B, C;
+    while (std::getline(file1, line) && std::getline(file2, line)) {
+        parseLine(line, ',', A, B);
+        table1[A].Bs.push_back(B);
+   
         parseLine(line, ',', A, C);
         table1[A].Cs.push_back(C);
     }
