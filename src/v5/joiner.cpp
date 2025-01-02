@@ -89,7 +89,7 @@ int hashJoin(const std::string& path1, const std::string& path2, const std::stri
                     const auto& Es = itTable4->second;
                     for (const auto& B : entry.Bs) {
                         for (const auto& C : entry.Cs) {
-                            for (const auto& E : entry.Es) {
+                            for (const auto& E : Es) {
                                 std::cout << D << "," << A << "," << B << "," << C << "," << E << std::endl;
                             }
                         }
