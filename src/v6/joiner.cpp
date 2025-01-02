@@ -28,52 +28,38 @@ int hashJoin(const std::string& path1, const std::string& path2, const std::stri
     std::unordered_map<std::string, std::vector<std::string>> table4; // Key: D, Values: E's
     table4.reserve(20000000);
 
-
-    
     // Read File1 (A,B)
     std::ifstream file1(path1);
-    if (!file1.is_open()) {
-        std::cerr << "Error opening File1\n";
-        return -1;
-    }
-    std::string line, A, B;
-    while (std::getline(file1, line)) {
-        parseLine(line, ',', A, B);
-        table1[A].Bs.push_back(B);
-    }
-
     // Read File2 (A,C)
     std::ifstream file2(path2);
-    if (!file2.is_open()) {
-        std::cerr << "Error opening File2\n";
+
+    if (!file1.is_open() || !file2.is_open()) {
+        std::cerr << "Error opening File1 or File2\n";
         return -1;
     }
-    std::string C;
-    while (std::getline(file2, line)) {
+    std::string line, A, B, C;
+    while (std::getline(file1, line) && std::getline(file2, line)) {
+        parseLine(line, ',', A, B);
+        table1[A].Bs.push_back(B);
+   
         parseLine(line, ',', A, C);
         table1[A].Cs.push_back(C);
     }
+    
 
     // Read File3 (A,D)
     std::ifstream file3(path3);
-    if (!file3.is_open()) {
-        std::cerr << "Error opening File3\n";
-        return -1;
-    }
-    std::string D;
-    while (std::getline(file3, line)) {
-        parseLine(line, ',', A, D);
-        table3[A].push_back(D);
-    }
-
     // Read File4 (D,E)
     std::ifstream file4(path4);
-    if (!file4.is_open()) {
-        std::cerr << "Error opening File4\n";
+    if (!file3.is_open() || !file4.is_open()) {
+        std::cerr << "Error opening File3 or File4\n";
         return -1;
     }
-    std::string E;
-    while (std::getline(file4, line)) {
+    std::string D, E;
+    while (std::getline(file3, line) && std::getline(file4, line)) {
+        parseLine(line, ',', A, D);
+        table3[A].push_back(D);
+
         parseLine(line, ',', D, E);
         table4[D].push_back(E);
     }
