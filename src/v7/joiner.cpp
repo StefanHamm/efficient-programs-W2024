@@ -20,18 +20,17 @@ void parseLine(const std::string& line, char delimiter, std::string_view& part1,
 
 int hashJoin(const std::string& path1, const std::string& path2, const std::string& path3, const std::string& path4) {
     std::unordered_map<std::string, Table1Entry> table1; // Key: A, Values: Bs and Cs
-    table1.reserve(file1.size());
 
     std::unordered_map<std::string, std::vector<std::string>> table3; // Key: A, Values: D's
-    table3.reserve(file3.size());
 
     std::unordered_map<std::string, std::vector<std::string>> table4; // Key: D, Values: E's
-    table4.reserve(file4.size());
 
 
     
     // Read File1 (A,B)
-    std::ifstream file1(path1);
+    std::ifstream file1(path1*2);
+    table1.reserve(file1.size());
+
     if (!file1.is_open()) {
         std::cerr << "Error opening File1\n";
         return -1;
@@ -57,6 +56,8 @@ int hashJoin(const std::string& path1, const std::string& path2, const std::stri
 
     // Read File3 (A,D)
     std::ifstream file3(path3);
+    table3.reserve(file3.size());
+
     if (!file3.is_open()) {
         std::cerr << "Error opening File3\n";
         return -1;
@@ -69,6 +70,8 @@ int hashJoin(const std::string& path1, const std::string& path2, const std::stri
 
     // Read File4 (D,E)
     std::ifstream file4(path4);
+    table4.reserve(file4.size());
+
     if (!file4.is_open()) {
         std::cerr << "Error opening File4\n";
         return -1;
