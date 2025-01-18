@@ -101,19 +101,19 @@ int hashJoin(const std::string& path1, const std::string& path2, const std::stri
                                 }
 
                                 // Copy data into the buffer
-                                std::memcpy(&outputBuffer[bufferPos], D.data(), D.size());
+                                memcpy(&outputBuffer[bufferPos], D.data(), D.size());
                                 bufferPos += D.size();
                                 outputBuffer[bufferPos++] = ',';
-                                std::memcpy(&outputBuffer[bufferPos], A.data(), A.size());
+                                memcpy(&outputBuffer[bufferPos], A.data(), A.size());
                                 bufferPos += A.size();
                                 outputBuffer[bufferPos++] = ',';
-                                std::memcpy(&outputBuffer[bufferPos], B.data(), B.size());
+                                memcpy(&outputBuffer[bufferPos], B.data(), B.size());
                                 bufferPos += B.size();
                                 outputBuffer[bufferPos++] = ',';
-                                std::memcpy(&outputBuffer[bufferPos], C.data(), C.size());
+                                memcpy(&outputBuffer[bufferPos], C.data(), C.size());
                                 bufferPos += C.size();
                                 outputBuffer[bufferPos++] = ',';
-                                std::memcpy(&outputBuffer[bufferPos], E.data(), E.size());
+                                memcpy(&outputBuffer[bufferPos], E.data(), E.size());
                                 bufferPos += E.size();
                                 outputBuffer[bufferPos++] = '\n';
                             }
