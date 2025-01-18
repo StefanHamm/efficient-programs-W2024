@@ -18,15 +18,6 @@ void parseLine(const std::string& line, char delimiter, std::string& part1, std:
     }
 }
 
-std::string readFileIntoString(const std::string& path) {
-    std::ifstream input_file(path, std::ios::in | std::ios::binary);
-    if (!input_file.is_open()) {
-        std::cerr << "Error opening file: " << path << std::endl;
-        return "";
-    }
-    return std::string((std::istreambuf_iterator<char>(input_file)), std::istreambuf_iterator<char>());
-}
-
 int hashJoin(const std::string& path1, const std::string& path2, const std::string& path3, const std::string& path4) {
     std::unordered_map<std::string, Table1Entry> table1; // Key: A, Values: Bs and Cs
     table1.reserve(20000000);
@@ -37,51 +28,69 @@ int hashJoin(const std::string& path1, const std::string& path2, const std::stri
     std::unordered_map<std::string, std::vector<std::string>> table4; // Key: D, Values: E's
     table4.reserve(20000000);
 
-    // Read and process File1 (A,B)
-    std::string file1_contents = readFileIntoString(path1);
-    std::istringstream file1_stream(file1_contents);
+    // Read File1 (A,B)
+    std::ifstream file1(path1);
+    if (!file1.is_open()) {
+        std::cerr << "Error opening File1\n";
+        return -1;
+    }
     std::string line, A, B;
-    while (std::getline(file1_stream, line)) {
+    while (std::getline(file1, line)) {        
         parseLine(line, ',', A, B);
-        table1[A].Bs.push_back(B);
+        table1[A].Bs.push_back(std::move(B));
     }
 
-    // Read and process File2 (A,C)
-    std::string file2_contents = readFileIntoString(path2);
-    std::istringstream file2_stream(file2_contents);
+    // Read File2 (A,C)
+    std::ifstream file2(path2);
+    if (!file2.is_open()) {
+        std::cerr << "Error opening File2\n";
+        return -1;
+    }
     std::string C;
-    while (std::getline(file2_stream, line)) {
+    while (std::getline(file2, line)) {
         parseLine(line, ',', A, C);
-        table1[A].Cs.push_back(C);
+        table1[A].Cs.push_back(std::move(C));
     }
 
-    // Read and process File3 (A,D)
-    std::string file3_contents = readFileIntoString(path3);
-    std::istringstream file3_stream(file3_contents);
+    // Read File3 (A,D)
+    std::ifstream file3(path3);
+    if (!file3.is_open()) {
+        std::cerr << "Error opening File3\n";
+        return -1;
+    }
     std::string D;
-    while (std::getline(file3_stream, line)) {
+    while (std::getline(file3, line)) {
         parseLine(line, ',', A, D);
-        table3[A].push_back(D);
+        table3[A].push_back(std::move(D));
     }
 
-    // Read and process File4 (D,E)
-    std::string file4_contents = readFileIntoString(path4);
-    std::istringstream file4_stream(file4_contents);
+    // Read File4 (D,E)
+    std::ifstream file4(path4);
+    if (!file4.is_open()) {
+        std::cerr << "Error opening File4\n";
+        return -1;
+    }
     std::string E;
-    while (std::getline(file4_stream, line)) {
+    while (std::getline(file4, line)) {
         parseLine(line, ',', D, E);
-        table4[D].push_back(E);
+        table4[D].push_back(std::move(E));
     }
 
-    // Perform the join (unchanged)
+    // Perform the join (optimized)
     for (const auto& [A, entry] : table1) {
-        if (table3.find(A) != table3.end()) {
-            for (const auto& D : table3[A]) {
-                if (table4.find(D) != table4.end()) {
-                    for (const auto& E : table4[D]) {
-                        for (const auto& B : entry.Bs) {
-                            for (const auto& C : entry.Cs) {
-                                std::cout << D << "," << A << "," << B << "," << C << "," << E << std::endl;
+        auto it3 = table3.find(A);
+        if (it3 != table3.end()) {
+            const auto& Ds = it3->second;
+            for (const auto& D : Ds) {
+                auto it4 = table4.find(D);
+                if (it4 != table4.end()) {
+                    const auto& Es = it4->second;
+                    const auto& Bs = entry.Bs;
+                    const auto& Cs = entry.Cs;
+                    for (const auto& E : Es) {
+                        for (const auto& B : Bs) {
+                            for (const auto& C : Cs) {
+                                std::cout << D << ',' << A << ',' << B << ',' << C << ',' << E << '\n';
                             }
                         }
                     }
