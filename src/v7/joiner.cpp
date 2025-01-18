@@ -10,23 +10,23 @@ struct Table1Entry {
     std::vector<std::string> Cs;
 };
 
-void parseLine(const std::string& line, char delimiter, std::string& part1, std::string& part2) {
+void parseLine(const std::string& line, char delimiter, std::string_view& part1, std::string_view& part2) {
     size_t delimPos = line.find(delimiter);
     if (delimPos != std::string::npos) {
-        part1 = line.substr(0, delimPos);
-        part2 = line.substr(delimPos + 1);
+        part1 = std::string_view(line.data(), delimPos);  // Use string_view
+        part2 = std::string_view(line.data() + delimPos + 1, line.size() - delimPos - 1); // Use string_view
     }
 }
 
 int hashJoin(const std::string& path1, const std::string& path2, const std::string& path3, const std::string& path4) {
     std::unordered_map<std::string, Table1Entry> table1; // Key: A, Values: Bs and Cs
-    table1.reserve(20000000);
+    table1.reserve(file1.size());
 
     std::unordered_map<std::string, std::vector<std::string>> table3; // Key: A, Values: D's
-    table3.reserve(20000000);
+    table3.reserve(file3.size());
 
     std::unordered_map<std::string, std::vector<std::string>> table4; // Key: D, Values: E's
-    table4.reserve(20000000);
+    table4.reserve(file4.size());
 
 
     
@@ -36,10 +36,11 @@ int hashJoin(const std::string& path1, const std::string& path2, const std::stri
         std::cerr << "Error opening File1\n";
         return -1;
     }
-    std::string line, A, B;
+    std::string line;
+    std::string_view A, B;
     while (std::getline(file1, line)) {
         parseLine(line, ',', A, B);
-        table1[A].Bs.push_back(B);
+        table1[std::string(A)].Bs.push_back(std::string(B));
     }
 
     // Read File2 (A,C)
@@ -48,10 +49,10 @@ int hashJoin(const std::string& path1, const std::string& path2, const std::stri
         std::cerr << "Error opening File2\n";
         return -1;
     }
-    std::string C;
+    std::string_view C;
     while (std::getline(file2, line)) {
         parseLine(line, ',', A, C);
-        table1[A].Cs.push_back(C);
+        table1[std::string(A)].Cs.push_back(std::string(C));
     }
 
     // Read File3 (A,D)
@@ -60,10 +61,10 @@ int hashJoin(const std::string& path1, const std::string& path2, const std::stri
         std::cerr << "Error opening File3\n";
         return -1;
     }
-    std::string D;
+    std::string_view D;
     while (std::getline(file3, line)) {
         parseLine(line, ',', A, D);
-        table3[A].push_back(D);
+        table3[std::string(A)].push_back(std::string(D));
     }
 
     // Read File4 (D,E)
@@ -72,47 +73,28 @@ int hashJoin(const std::string& path1, const std::string& path2, const std::stri
         std::cerr << "Error opening File4\n";
         return -1;
     }
-    std::string E;
+    std::string_view E;
     while (std::getline(file4, line)) {
         parseLine(line, ',', D, E);
-        table4[D].push_back(E);
+        table4[std::string(D)].push_back(std::string(E));
     }
-// Perform the join
+
+    // Perform the join
     for (const auto& [A, entry] : table1) {
-    auto itTable3 = table3.find(A);
-    if (itTable3 != table3.end()) {
-        const auto& Ds = itTable3->second;
-        for (const auto& D : Ds) {
-            auto itTable4 = table4.find(D);
-            if (itTable4 != table4.end()) {
-                const auto& Es = itTable4->second;
-                // Unroll the loops for Bs and Cs (assuming even number of elements in each)
-                size_t sizeB = entry.Bs.size();
-                size_t sizeC = entry.Cs.size();
-
-                // Unrolling Bs and Cs
-                for (size_t i = 0; i < sizeB; i += 2) {
-                    // Process two elements from Bs
-                    for (size_t j = 0; j < sizeC; j += 2) {
-                        std::cout << D << "," << A << "," << entry.Bs[i] << "," << entry.Cs[j] << "," << Es[0] << std::endl;
-                        if (i + 1 < sizeB && j + 1 < sizeC) {
-                            std::cout << D << "," << A << "," << entry.Bs[i + 1] << "," << entry.Cs[j + 1] << "," << Es[0] << std::endl;
-                        }
-                    }
-                }
-
-                // Fallback if the size of Bs or Cs is odd
-                if (sizeB % 2 != 0 || sizeC % 2 != 0) {
-                    for (size_t i = sizeB - (sizeB % 2); i < sizeB; i++) {
-                        for (size_t j = sizeC - (sizeC % 2); j < sizeC; j++) {
-                            std::cout << D << "," << A << "," << entry.Bs[i] << "," << entry.Cs[j] << "," << Es[0] << std::endl;
+        if (table3.find(A) != table3.end()) {
+            for (const auto& D : table3[A]) {
+                if (table4.find(D) != table4.end()) {
+                    for (const auto& E : table4[D]) {
+                        for (const auto& B : entry.Bs) {
+                            for (const auto& C : entry.Cs) {
+                                std::cout << D << "," << A << "," << B << "," << C << "," << E << std::endl;
+                            }
                         }
                     }
                 }
             }
         }
     }
-}
 
     return 0;
 }
