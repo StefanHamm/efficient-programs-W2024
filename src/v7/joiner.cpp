@@ -28,8 +28,8 @@ int hashJoin(const std::string& path1, const std::string& path2, const std::stri
 
     
     // Read File1 (A,B)
-    std::ifstream file1(path1*2);
-    table1.reserve(file1.size());
+    std::ifstream file1(path1);
+    table1.reserve(file1.size()*2);
 
     if (!file1.is_open()) {
         std::cerr << "Error opening File1\n";
