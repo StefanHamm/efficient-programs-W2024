@@ -5,25 +5,48 @@
 #include <vector>
 #include <string>
 #include <algorithm>
+#include <future>
+#include <immintrin.h>
 #include "joiner.h"
 
 // Chunk size (adjust based on your system's memory and performance characteristics)
-const size_t CHUNK_SIZE = 1024 * 1024 * 1000; //  MB
+const size_t CHUNK_SIZE = 1024 * 1024 * 10; // 10 MB
+const int VECTOR_SIZE = 16; // SIMD vector size
 
 struct Table1Entry {
     std::vector<std::string> Bs;
     std::vector<std::string> Cs;
 };
 
+// Optimized parsing function using SIMD to find delimiters and split lines
 void parseLine(const std::string& line, char delimiter, std::string& part1, std::string& part2) {
-    size_t delimPos = line.find(delimiter);
+    size_t delimPos = std::string::npos;
+    __m128i delimiterVec = _mm_set1_epi8(delimiter);
+    size_t i = 0;
+    for (; i + VECTOR_SIZE <= line.size(); i += VECTOR_SIZE) {
+        __m128i chunk = _mm_loadu_si128(reinterpret_cast<const __m128i*>(line.data() + i));
+        __m128i mask = _mm_cmpeq_epi8(chunk, delimiterVec);
+        unsigned int maskValue = _mm_movemask_epi8(mask);
+        if (maskValue != 0) {
+            delimPos = i + __builtin_ctz(maskValue);
+            break;
+        }
+    }
+    if (delimPos == std::string::npos) {
+        for (; i < line.size(); ++i) {
+            if (line[i] == delimiter) {
+                delimPos = i;
+                break;
+            }
+        }
+    }
     if (delimPos != std::string::npos) {
         part1 = line.substr(0, delimPos);
         part2 = line.substr(delimPos + 1);
     }
 }
 
-// Function to process a chunk of a file
+// Function to process a chunk of a file (generic)
 template <typename TableType>
 void processChunk(std::ifstream& file, char delimiter, TableType& table) {
     std::string line, key, value;
@@ -33,17 +56,14 @@ void processChunk(std::ifstream& file, char delimiter, TableType& table) {
     }
 }
 
-// Function to process a chunk of file1 and file2
+// Function to process chunks of file1 and file2 (specific)
 void processChunk(std::ifstream& file1, std::ifstream& file2, char delimiter, std::unordered_map<std::string, Table1Entry>& table1, bool isFirstChunk) {
     std::string line, A, B, C;
     if (isFirstChunk) {
-        // Read file1 until a full chunk is processed or EOF is reached.
         while (std::getline(file1, line)) {
             parseLine(line, ',', A, B);
             table1[A].Bs.push_back(B);
         }
-
-        // Read file2 until a full chunk is processed or EOF is reached.
         while (std::getline(file2, line)) {
             parseLine(line, ',', A, C);
             table1[A].Cs.push_back(C);
@@ -68,6 +88,7 @@ void processChunk(std::ifstream& file1, std::ifstream& file2, char delimiter, st
     }
 }
 
+
 int hashJoin(const std::string& path1, const std::string& path2, const std::string& path3, const std::string& path4) {
     std::unordered_map<std::string, Table1Entry> table1;
     std::unordered_map<std::string, std::vector<std::string>> table3;
@@ -84,21 +105,37 @@ int hashJoin(const std::string& path1, const std::string& path2, const std::stri
         return -1;
     }
 
-    // Process file1 and file2 in chunks
-    bool isFirstChunk = true;
-    while (file1.peek() != EOF || file2.peek() != EOF) {
-        processChunk(file1, file2, ',', table1, isFirstChunk);
-        isFirstChunk = false;
-    }
+    // Lambda function for asynchronous processing of chunks
+    auto processChunksAsync = [&](auto& file, auto& table, char delimiter) {
+        return std::async(std::launch::async, [&](){
+            while(file.peek() != EOF){
+               processChunk(file, delimiter, table);
+           }
+        });
+    };
 
-    // Process file3 and file4 in chunks
-    while (file3.peek() != EOF) {
-        processChunk(file3, ',', table3);
-    }
+    auto processChunkAsync = [&](auto& file1, auto& file2, auto& table1, char delimiter, bool isFirstChunk){
+        return std::async(std::launch::async, [&](){
+            bool lFirstChunk = isFirstChunk;
+            while (file1.peek() != EOF || file2.peek() != EOF) {
+                processChunk(file1, file2, delimiter, table1, lFirstChunk);
+                lFirstChunk = false;
+            }
+        });
+    };
 
-    while (file4.peek() != EOF) {
-        processChunk(file4, ',', table4);
-    }
+    // Process file1 and file2 asynchronously
+    auto future1and2 = processChunkAsync(file1, file2, table1, ',', true);
+
+    // Process file3 and file4 asynchronously
+    auto future3 = processChunksAsync(file3, table3, ',');
+    auto future4 = processChunksAsync(file4, table4, ',');
+
+
+    future1and2.get();
+    future3.get();
+    future4.get();
+
 
     // Perform the join
     for (const auto& [A, entry] : table1) {
