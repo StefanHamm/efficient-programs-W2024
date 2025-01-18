@@ -19,16 +19,19 @@ void parseLine(const std::string& line, char delimiter, std::string_view& part1,
 }
 
 int hashJoin(const std::string& path1, const std::string& path2, const std::string& path3, const std::string& path4) {
-    std::unordered_map<std::string, Table1Entry> table1; // Key: A, Values: Bs and Cs
+    std::unordered_map<std::string_view, Table1Entry> table1; // Key: A, Values: Bs and Cs
     table1.reserve(20000000);
 
-    std::unordered_map<std::string, std::vector<std::string>> table3; // Key: A, Values: D's
+    std::unordered_map<std::string_view, std::vector<std::string>> table3; // Key: A, Values: D's
     table3.reserve(20000000);
 
-    std::unordered_map<std::string, std::vector<std::string>> table4; // Key: D, Values: E's
+    std::unordered_map<std::string_view, std::vector<std::string>> table4; // Key: D, Values: E's
     table4.reserve(20000000);
 
-
+    std::vector<std::string> file1Lines;
+    std::vector<std::string> file2Lines;
+    std::vector<std::string> file3Lines;
+    std::vector<std::string> file4Lines;
     
     // Read File1 (A,B)
     std::ifstream file1(path1);
@@ -39,9 +42,12 @@ int hashJoin(const std::string& path1, const std::string& path2, const std::stri
     std::string line;
     std::string_view A, B;
     while (std::getline(file1, line)) {
-        parseLine(line, ',', A, B);
+        file1Lines.push_back(std::move(line));
+        const std::string& storedLine = file1Lines.back();
+        parseLine(storedLine, ',', A, B);
         table1[std::string(A)].Bs.push_back(std::string(B));
-    }
+        table1[A].Bs.emplace_back(B);
+   }
 
     // Read File2 (A,C)
     std::ifstream file2(path2);
