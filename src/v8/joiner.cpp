@@ -8,7 +8,7 @@
 #include "joiner.h"
 
 // Chunk size (adjust based on your system's memory and performance characteristics)
-const size_t CHUNK_SIZE = 1024 * 1024 * 400; //  MB
+const size_t CHUNK_SIZE = 1024 * 1024 * 1000; //  MB
 
 struct Table1Entry {
     std::vector<std::string> Bs;
