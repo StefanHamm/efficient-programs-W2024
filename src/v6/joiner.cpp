@@ -28,10 +28,7 @@ int hashJoin(const std::string& path1, const std::string& path2, const std::stri
     std::unordered_map<std::string, std::vector<std::string>> table4; // Key: D, Values: E's
     table4.reserve(20000000);
 
-    std::vector<std::string> file1Lines;
-    std::vector<std::string> file2Lines;
-    std::vector<std::string> file3Lines;
-    std::vector<std::string> file4Lines;
+
 
     
     // Read File1 (A,B)
@@ -42,12 +39,9 @@ int hashJoin(const std::string& path1, const std::string& path2, const std::stri
     }
     std::string line;
     std::string_view A, B;
-    while (std::getline(file1, line)) {
-        file1Lines.push_back(std::move(line));
-        const std::string& storedLine = file1Lines.back();
-        parseLine(storedLine, ',', A, B);
+    while (std::getline(file1, line)) {        
+        parseLine(line, ',', A, B);
         table1[std::string(A)].Bs.push_back(std::string(B));
-        table1[A].Bs.emplace_back(B);
     }
 
     // Read File2 (A,C)
