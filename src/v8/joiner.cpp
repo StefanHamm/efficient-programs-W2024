@@ -136,6 +136,10 @@ int hashJoin(const std::string& path1, const std::string& path2, const std::stri
        if (!D.empty()) table4[D].push_back(E);
     }
 
+    const size_t BUFFER_SIZE = 1024 * 1024 * 1024; // 1 GB
+    std::vector<char> outputBuffer(BUFFER_SIZE);
+    size_t bufferPos = 0; // Tracks the current position in the buffer
+
     // Perform the join
     for (const auto& [A, entry] : table1) {
         if (table3.find(A) != table3.end()) {
@@ -144,7 +148,32 @@ int hashJoin(const std::string& path1, const std::string& path2, const std::stri
                     for (const auto& E : table4[D]) {
                         for (const auto& B : entry.Bs) {
                             for (const auto& C : entry.Cs) {
-                                std::cout << D << "," << A << "," << B << "," << C << "," << E << std::endl;
+                                // Calculate the size of the current record
+                                size_t recordSize = D.size() + A.size() + B.size() + C.size() + E.size() + 5; // 4 commas and 1 newline
+
+                                // Check if the buffer has enough space
+                                if (bufferPos + recordSize > BUFFER_SIZE) {
+                                    // Write the buffer to stdout and reset
+                                    std::cout.write(outputBuffer.data(), bufferPos);
+                                    bufferPos = 0; // Reset buffer position
+                                }
+
+                                // Copy data into the buffer
+                                memcpy(&outputBuffer[bufferPos], D.data(), D.size());
+                                bufferPos += D.size();
+                                outputBuffer[bufferPos++] = ',';
+                                memcpy(&outputBuffer[bufferPos], A.data(), A.size());
+                                bufferPos += A.size();
+                                outputBuffer[bufferPos++] = ',';
+                                memcpy(&outputBuffer[bufferPos], B.data(), B.size());
+                                bufferPos += B.size();
+                                outputBuffer[bufferPos++] = ',';
+                                memcpy(&outputBuffer[bufferPos], C.data(), C.size());
+                                bufferPos += C.size();
+                                outputBuffer[bufferPos++] = ',';
+                                memcpy(&outputBuffer[bufferPos], E.data(), E.size());
+                                bufferPos += E.size();
+                                outputBuffer[bufferPos++] = '\n';
                             }
                         }
                     }
@@ -152,12 +181,11 @@ int hashJoin(const std::string& path1, const std::string& path2, const std::stri
             }
         }
     }
+    if (bufferPos > 0) {
+        std::cout.write(outputBuffer.data(), bufferPos);
+    }
 
-    // Unmap memory
-    unmapFile(file1_data, fileSize1);
-    unmapFile(file2_data, fileSize2);
-    unmapFile(file3_data, fileSize3);
-    unmapFile(file4_data, fileSize4);
+
     return 0;
 }
 
