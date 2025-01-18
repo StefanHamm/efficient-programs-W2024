@@ -138,13 +138,19 @@ int hashJoin(const std::string& path1, const std::string& path2, const std::stri
 
     // Perform the join
     for (const auto& [A, entry] : table1) {
-        if (table3.find(A) != table3.end()) {
-            for (const auto& D : table3[A]) {
-                if (table4.find(D) != table4.end()) {
-                    for (const auto& E : table4[D]) {
-                        for (const auto& B : entry.Bs) {
-                            for (const auto& C : entry.Cs) {
-                                std::cout << D << "," << A << "," << B << "," << C << "," << E << std::endl;
+        auto it3 = table3.find(A);
+        if (it3 != table3.end()) {
+            const auto& Ds = it3->second;
+            for (const auto& D : Ds) {
+                auto it4 = table4.find(D);
+                if (it4 != table4.end()) {
+                    const auto& Es = it4->second;
+                    const auto& Bs = entry.Bs;
+                    const auto& Cs = entry.Cs;
+                    for (const auto& E : Es) {
+                        for (const auto& B : Bs) {
+                            for (const auto& C : Cs) {
+                                std::cout << D << ',' << A << ',' << B << ',' << C << ',' << E << '\n';
                             }
                         }
                     }
