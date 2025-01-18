@@ -4,138 +4,137 @@
 #include <unordered_map>
 #include <vector>
 #include <string>
+#include <sys/mman.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <cstring>
 #include <algorithm>
-#include <future>
-#include <immintrin.h>
-#include "joiner.h"
-
-// Chunk size (adjust based on your system's memory and performance characteristics)
-const size_t CHUNK_SIZE = 1024 * 1024 * 10; // 10 MB
-const int VECTOR_SIZE = 16; // SIMD vector size
+#include <x86intrin.h>
 
 struct Table1Entry {
     std::vector<std::string> Bs;
     std::vector<std::string> Cs;
 };
 
-// Optimized parsing function using SIMD to find delimiters and split lines
-void parseLine(const std::string& line, char delimiter, std::string& part1, std::string& part2) {
-    size_t delimPos = std::string::npos;
-    __m128i delimiterVec = _mm_set1_epi8(delimiter);
-    size_t i = 0;
-    for (; i + VECTOR_SIZE <= line.size(); i += VECTOR_SIZE) {
-        __m128i chunk = _mm_loadu_si128(reinterpret_cast<const __m128i*>(line.data() + i));
-        __m128i mask = _mm_cmpeq_epi8(chunk, delimiterVec);
-        unsigned int maskValue = _mm_movemask_epi8(mask);
-        if (maskValue != 0) {
-            delimPos = i + __builtin_ctz(maskValue);
-            break;
-        }
+
+// Helper function to get file size
+size_t getFileSize(int fd) {
+    struct stat st;
+    if (fstat(fd, &st) == -1) {
+        return 0;
     }
-    if (delimPos == std::string::npos) {
-        for (; i < line.size(); ++i) {
-            if (line[i] == delimiter) {
-                delimPos = i;
-                break;
+    return st.st_size;
+}
+
+// Helper function to map file into memory
+char* mapFile(const std::string& path, size_t& fileSize) {
+    int fd = open(path.c_str(), O_RDONLY);
+    if (fd == -1) {
+        return nullptr;
+    }
+    fileSize = getFileSize(fd);
+    if (fileSize == 0) {
+        close(fd);
+        return nullptr;
+    }
+    char* addr = (char*)mmap(nullptr, fileSize, PROT_READ, MAP_PRIVATE, fd, 0);
+    close(fd); // File descriptor is no longer needed after mmap
+    if (addr == MAP_FAILED) {
+        return nullptr;
+    }
+    return addr;
+}
+
+void unmapFile(char* addr, size_t fileSize) {
+    if (addr != nullptr) {
+        munmap(addr, fileSize);
+    }
+}
+
+
+// New parseLine function that operates on memory mapped data
+void parseLineMMAP(const char* data, size_t& pos, size_t fileSize, char delimiter, std::string& part1, std::string& part2) {
+    size_t start = pos;
+    while (pos < fileSize && data[pos] != delimiter && data[pos] != '\n') {
+        pos++;
+    }
+    if (pos < fileSize) {
+        part1.assign(data + start, pos - start);
+        if (data[pos] == delimiter)
+        {
+            start = ++pos;
+            while (pos < fileSize && data[pos] != '\n') {
+                pos++;
             }
+            part2.assign(data + start, pos - start);
         }
-    }
-    if (delimPos != std::string::npos) {
-        part1 = line.substr(0, delimPos);
-        part2 = line.substr(delimPos + 1);
-    }
-}
-
-// Function to process a chunk of a file (generic)
-template <typename TableType>
-void processChunk(std::ifstream& file, char delimiter, TableType& table) {
-    std::string line, key, value;
-    while (std::getline(file, line)) {
-        parseLine(line, delimiter, key, value);
-        table[key].push_back(value);
+        
+        if (pos < fileSize && data[pos] == '\n') pos++;
     }
 }
-
-// Function to process chunks of file1 and file2 (specific)
-void processChunk(std::ifstream& file1, std::ifstream& file2, char delimiter, std::unordered_map<std::string, Table1Entry>& table1, bool isFirstChunk) {
-    std::string line, A, B, C;
-    if (isFirstChunk) {
-        while (std::getline(file1, line)) {
-            parseLine(line, ',', A, B);
-            table1[A].Bs.push_back(B);
-        }
-        while (std::getline(file2, line)) {
-            parseLine(line, ',', A, C);
-            table1[A].Cs.push_back(C);
-        }
-    } else {
-        // Reset file streams to the beginning for subsequent chunks
-        file1.clear();
-        file1.seekg(0);
-        file2.clear();
-        file2.seekg(0);
-
-        // Re-process to update table1
-        while (std::getline(file1, line)) {
-            parseLine(line, ',', A, B);
-            table1[A].Bs.push_back(B);
-        }
-
-        while (std::getline(file2, line)) {
-            parseLine(line, ',', A, C);
-            table1[A].Cs.push_back(C);
-        }
-    }
-}
-
 
 int hashJoin(const std::string& path1, const std::string& path2, const std::string& path3, const std::string& path4) {
     std::unordered_map<std::string, Table1Entry> table1;
+    table1.reserve(20000000);
+
     std::unordered_map<std::string, std::vector<std::string>> table3;
+    table3.reserve(20000000);
+
     std::unordered_map<std::string, std::vector<std::string>> table4;
+    table4.reserve(20000000);
 
-    // Open all files
-    std::ifstream file1(path1);
-    std::ifstream file2(path2);
-    std::ifstream file3(path3);
-    std::ifstream file4(path4);
+    // Memory-map the files
+    size_t fileSize1, fileSize2, fileSize3, fileSize4;
+    char* file1_data = mapFile(path1, fileSize1);
+    char* file2_data = mapFile(path2, fileSize2);
+    char* file3_data = mapFile(path3, fileSize3);
+    char* file4_data = mapFile(path4, fileSize4);
 
-    if (!file1.is_open() || !file2.is_open() || !file3.is_open() || !file4.is_open()) {
-        std::cerr << "Error opening files\n";
+    if (!file1_data || !file2_data || !file3_data || !file4_data) {
+        std::cerr << "Error mapping files\n";
+        unmapFile(file1_data, fileSize1);
+        unmapFile(file2_data, fileSize2);
+        unmapFile(file3_data, fileSize3);
+        unmapFile(file4_data, fileSize4);
         return -1;
     }
 
-    // Lambda function for asynchronous processing of chunks
-    auto processChunksAsync = [&](auto& file, auto& table, char delimiter) {
-        return std::async(std::launch::async, [&](){
-            while(file.peek() != EOF){
-               processChunk(file, delimiter, table);
-           }
-        });
-    };
-
-    auto processChunkAsync = [&](auto& file1, auto& file2, auto& table1, char delimiter, bool isFirstChunk){
-        return std::async(std::launch::async, [&](){
-            bool lFirstChunk = isFirstChunk;
-            while (file1.peek() != EOF || file2.peek() != EOF) {
-                processChunk(file1, file2, delimiter, table1, lFirstChunk);
-                lFirstChunk = false;
-            }
-        });
-    };
-
-    // Process file1 and file2 asynchronously
-    auto future1and2 = processChunkAsync(file1, file2, table1, ',', true);
-
-    // Process file3 and file4 asynchronously
-    auto future3 = processChunksAsync(file3, table3, ',');
-    auto future4 = processChunksAsync(file4, table4, ',');
+    // Read File1 (A,B)
+    size_t pos = 0;
+    std::string A, B;
+    while (pos < fileSize1) {
+       parseLineMMAP(file1_data, pos, fileSize1, ',', A, B);
+       if (!A.empty()) table1[A].Bs.push_back(B);
+    }
 
 
-    future1and2.get();
-    future3.get();
-    future4.get();
+    // Read File2 (A,C)
+    pos = 0;
+    std::string C;
+    while (pos < fileSize2) {
+       parseLineMMAP(file2_data, pos, fileSize2, ',', A, C);
+       if (!A.empty()) table1[A].Cs.push_back(C);
+    }
 
+
+    // Read File3 (A,D)
+    pos = 0;
+    std::string D;
+    while (pos < fileSize3) {
+       parseLineMMAP(file3_data, pos, fileSize3, ',', A, D);
+       if (!A.empty()) table3[A].push_back(D);
+    }
+
+
+    // Read File4 (D,E)
+    pos = 0;
+    std::string E;
+    while (pos < fileSize4) {
+       parseLineMMAP(file4_data, pos, fileSize4, ',', D, E);
+       if (!D.empty()) table4[D].push_back(E);
+    }
 
     // Perform the join
     for (const auto& [A, entry] : table1) {
@@ -154,6 +153,11 @@ int hashJoin(const std::string& path1, const std::string& path2, const std::stri
         }
     }
 
+    // Unmap memory
+    unmapFile(file1_data, fileSize1);
+    unmapFile(file2_data, fileSize2);
+    unmapFile(file3_data, fileSize3);
+    unmapFile(file4_data, fileSize4);
     return 0;
 }
 
