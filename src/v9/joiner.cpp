@@ -91,8 +91,6 @@ int hashJoin(const std::string& path1, const std::string& path2, const std::stri
                     for (const auto& E : table4[D]) {
                         for (const auto& B : entry.Bs) {
                             for (const auto& C : entry.Cs) {
-                                // Calculate the size of the current record
-                                size_t recordSize = D.size() + A.size() + B.size() + C.size() + E.size() + 5; // 4 commas and 1 newline
                                 // Copy data into the buffer
                                 memcpy(&outputBuffer[bufferPos], D.data(), D.size());
                                 bufferPos += D.size();
