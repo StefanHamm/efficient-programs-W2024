@@ -10,7 +10,7 @@ struct Table1Entry {
     std::vector<std::string> Cs;
 };
 
-void parseLine(const std::string& line, char delimiter, std::string& part1, std::string& part2) {
+void parseLine(std::string_view line, char delimiter, std::string_view& part1, std::string_view& part2) {
     size_t delimPos = line.find(delimiter);
     if (delimPos != std::string::npos) {
         part1 = line.substr(0, delimPos);
