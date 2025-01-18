@@ -12,7 +12,7 @@ struct Table1Entry {
 
 void parseLine(std::string_view line, char delimiter, std::string_view& part1, std::string_view& part2) {
     size_t delimPos = line.find(delimiter);
-    if (delimPos != std::string::npos) {
+    if (delimPos != std::string_view::npos) {
         part1 = line.substr(0, delimPos);
         part2 = line.substr(delimPos + 1);
     }
