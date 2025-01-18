@@ -4,6 +4,7 @@
 #include <unordered_map>
 #include <vector>
 #include <string>
+#include <cstring>
 
 struct Table1Entry {
     std::vector<std::string> Bs;
