@@ -7,8 +7,8 @@
 #include <string_view>
 
 struct Table1Entry {
-    std::vector<std::string_view> Bs;
-    std::vector<std::string_view> Cs;
+    std::vector<std::string> Bs;
+    std::vector<std::string> Cs;
 };
 
 void parseLine(const std::string& line, char delimiter, std::string_view& part1, std::string_view& part2) {
@@ -20,17 +20,17 @@ void parseLine(const std::string& line, char delimiter, std::string_view& part1,
 }
 
 int hashJoin(const std::string& path1, const std::string& path2, const std::string& path3, const std::string& path4) {
-    // Use string_view consistently as the key type
-    std::unordered_map<std::string_view, Table1Entry> table1; // Key: A, Values: Bs and Cs
+    // Use std::string as key type to ensure correctness
+    std::unordered_map<std::string, Table1Entry> table1; // Key: A, Values: Bs and Cs
     table1.reserve(20000000);
 
-    std::unordered_map<std::string_view, std::vector<std::string_view>> table3; // Key: A, Values: D's
+    std::unordered_map<std::string, std::vector<std::string>> table3; // Key: A, Values: D's
     table3.reserve(20000000);
 
-    std::unordered_map<std::string_view, std::vector<std::string_view>> table4; // Key: D, Values: E's
+    std::unordered_map<std::string, std::vector<std::string>> table4; // Key: D, Values: E's
     table4.reserve(20000000);
 
-    // Vectors to store lines for lifetime safety of string_views
+    // Vectors to store lines for lifetime safety
     std::vector<std::string> file1Lines, file2Lines, file3Lines, file4Lines;
 
     // Read File1 (A,B)
@@ -43,9 +43,9 @@ int hashJoin(const std::string& path1, const std::string& path2, const std::stri
     std::string_view A, B;
     while (std::getline(file1, line)) {
         file1Lines.push_back(std::move(line)); // Store the line
-        const std::string& storedLine = file1Lines.back(); // Reference the stored line
+        const std::string& storedLine = file1Lines.back();
         parseLine(storedLine, ',', A, B);
-        table1[A].Bs.push_back(B); // Use string_view
+        table1[std::string(A)].Bs.emplace_back(B); // Convert string_view to string
     }
 
     // Read File2 (A,C)
@@ -59,7 +59,7 @@ int hashJoin(const std::string& path1, const std::string& path2, const std::stri
         file2Lines.push_back(std::move(line)); // Store the line
         const std::string& storedLine = file2Lines.back();
         parseLine(storedLine, ',', A, C);
-        table1[A].Cs.push_back(C); // Use string_view
+        table1[std::string(A)].Cs.emplace_back(C); // Convert string_view to string
     }
 
     // Read File3 (A,D)
@@ -73,7 +73,7 @@ int hashJoin(const std::string& path1, const std::string& path2, const std::stri
         file3Lines.push_back(std::move(line)); // Store the line
         const std::string& storedLine = file3Lines.back();
         parseLine(storedLine, ',', A, D);
-        table3[A].push_back(D); // Use string_view
+        table3[std::string(A)].emplace_back(D); // Convert string_view to string
     }
 
     // Read File4 (D,E)
@@ -87,7 +87,7 @@ int hashJoin(const std::string& path1, const std::string& path2, const std::stri
         file4Lines.push_back(std::move(line)); // Store the line
         const std::string& storedLine = file4Lines.back();
         parseLine(storedLine, ',', D, E);
-        table4[D].push_back(E); // Use string_view
+        table4[std::string(D)].emplace_back(E); // Convert string_view to string
     }
 
     // Perform the join
@@ -113,6 +113,5 @@ int hashJoin(const std::string& path1, const std::string& path2, const std::stri
 }
 
 int join(const std::string path1, const std::string path2, const std::string path3, const std::string path4) {
-    int code = hashJoin(path1, path2, path3, path4);
-    return code;
+    return hashJoin(path1, path2, path3, path4);
 }
