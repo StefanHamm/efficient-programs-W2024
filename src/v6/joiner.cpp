@@ -79,16 +79,21 @@ int hashJoin(const std::string& path1, const std::string& path2, const std::stri
     }
 
     // Perform the join
-    for (size_t i = 0; i < entry.Bs.size(); i += 4) {
-        for (size_t j = 0; j < entry.Cs.size(); j += 4) {
-            for (size_t k = 0; k < 4 && i + k < entry.Bs.size(); ++k) {
-                for (size_t l = 0; l < 4 && j + l < entry.Cs.size(); ++l) {
-                    std::cout << D << "," << A << "," << entry.Bs[i+k] << "," << entry.Cs[j+l] << "," << E << std::endl;
+    for (const auto& [A, entry] : table1) {
+        if (table3.find(A) != table3.end()) {
+            for (const auto& D : table3[A]) {
+                if (table4.find(D) != table4.end()) {
+                    for (const auto& E : table4[D]) {
+                        for (const auto& B : entry.Bs) {
+                            for (const auto& C : entry.Cs) {
+                                std::cout << D << "," << A << "," << B << "," << C << "," << E << std::endl;
+                            }
+                        }
+                    }
+                }
             }
         }
     }
-}
-
 
     return 0;
 }
