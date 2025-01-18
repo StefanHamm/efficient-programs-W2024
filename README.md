@@ -69,4 +69,7 @@ Improving the loop by reducing the number of find calls
 Changed the order of the most inner loops.
 # v6: Loop Unrolling (TH)
 Unrolling the loops in the join
-# v7: 
+# v7: (TH)
+# v8: memory map (VB)
+# v9: Buffered Output (SH)
+Write everything at once in the end
