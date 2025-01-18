@@ -40,7 +40,7 @@ char* mapFile(const std::string& path, size_t& fileSize) {
         return nullptr;
     }
     char* addr = (char*)mmap(nullptr, fileSize, PROT_READ, MAP_PRIVATE, fd, 0);
-    close(fd); // File descriptor is no longer needed after mmap
+    close(fd); // File descrip is not needed after mmap
     if (addr == MAP_FAILED) {
         return nullptr;
     }
@@ -105,8 +105,10 @@ int hashJoin(const std::string& path1, const std::string& path2, const std::stri
     size_t pos = 0;
     std::string A, B;
     while (pos < fileSize1) {
-       parseLineMMAP(file1_data, pos, fileSize1, ',', A, B);
-       if (!A.empty()) table1[A].Bs.push_back(B);
+        parseLineMMAP(file1_data, pos, fileSize1, ',', A, B);
+        if (!A.empty()) {
+            table1[A].Bs.push_back(B);
+        }
     }
 
 
@@ -114,8 +116,10 @@ int hashJoin(const std::string& path1, const std::string& path2, const std::stri
     pos = 0;
     std::string C;
     while (pos < fileSize2) {
-       parseLineMMAP(file2_data, pos, fileSize2, ',', A, C);
-       if (!A.empty()) table1[A].Cs.push_back(C);
+        parseLineMMAP(file2_data, pos, fileSize2, ',', A, C);
+        if (!A.empty()) {
+            table1[A].Cs.push_back(C);
+        }
     }
 
 
@@ -123,8 +127,10 @@ int hashJoin(const std::string& path1, const std::string& path2, const std::stri
     pos = 0;
     std::string D;
     while (pos < fileSize3) {
-       parseLineMMAP(file3_data, pos, fileSize3, ',', A, D);
-       if (!A.empty()) table3[A].push_back(D);
+        parseLineMMAP(file3_data, pos, fileSize3, ',', A, D);
+        if (!A.empty()) {
+            table3[A].push_back(D);
+        }
     }
 
 
@@ -132,19 +138,28 @@ int hashJoin(const std::string& path1, const std::string& path2, const std::stri
     pos = 0;
     std::string E;
     while (pos < fileSize4) {
-       parseLineMMAP(file4_data, pos, fileSize4, ',', D, E);
-       if (!D.empty()) table4[D].push_back(E);
+        parseLineMMAP(file4_data, pos, fileSize4, ',', D, E);
+        if (!D.empty()) 
+        {
+            table4[D].push_back(E);
+        }
     }
 
-    // Perform the join
+// Perform the join
     for (const auto& [A, entry] : table1) {
-        if (table3.find(A) != table3.end()) {
-            for (const auto& D : table3[A]) {
-                if (table4.find(D) != table4.end()) {
-                    for (const auto& E : table4[D]) {
-                        for (const auto& B : entry.Bs) {
-                            for (const auto& C : entry.Cs) {
-                                std::cout << D << "," << A << "," << B << "," << C << "," << E << std::endl;
+        auto it3 = table3.find(A);
+        if (it3 != table3.end()) {
+            const auto& Ds = it3->second;
+            for (const auto& D : Ds) {
+                auto it4 = table4.find(D);
+                if (it4 != table4.end()) {
+                    const auto& Es = it4->second;
+                    const auto& Bs = entry.Bs;
+                    const auto& Cs = entry.Cs;
+                    for (const auto& E : Es) {
+                        for (const auto& B : Bs) {
+                            for (const auto& C : Cs) {
+                                std::cout << D << ',' << A << ',' << B << ',' << C << ',' << E << '\n';
                             }
                         }
                     }
@@ -152,6 +167,7 @@ int hashJoin(const std::string& path1, const std::string& path2, const std::stri
             }
         }
     }
+
 
     // Unmap memory
     unmapFile(file1_data, fileSize1);
