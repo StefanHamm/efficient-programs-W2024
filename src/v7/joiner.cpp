@@ -45,7 +45,6 @@ int hashJoin(const std::string& path1, const std::string& path2, const std::stri
         file1Lines.push_back(std::move(line));
         const std::string& storedLine = file1Lines.back();
         parseLine(storedLine, ',', A, B);
-        table1[std::string(A)].Bs.push_back(std::string(B));
         table1[A].Bs.emplace_back(B);
    }
 
