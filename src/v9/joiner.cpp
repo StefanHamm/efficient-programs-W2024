@@ -93,14 +93,6 @@ int hashJoin(const std::string& path1, const std::string& path2, const std::stri
                             for (const auto& C : entry.Cs) {
                                 // Calculate the size of the current record
                                 size_t recordSize = D.size() + A.size() + B.size() + C.size() + E.size() + 5; // 4 commas and 1 newline
-
-                                // Check if the buffer has enough space
-                                if (bufferPos + recordSize > BUFFER_SIZE) {
-                                    // Write the buffer to stdout and reset
-                                    std::cout.write(outputBuffer.data(), bufferPos);
-                                    bufferPos = 0; // Reset buffer position
-                                }
-
                                 // Copy data into the buffer
                                 memcpy(&outputBuffer[bufferPos], D.data(), D.size());
                                 bufferPos += D.size();
