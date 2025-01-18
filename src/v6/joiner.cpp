@@ -36,7 +36,8 @@ int hashJoin(const std::string& path1, const std::string& path2, const std::stri
         std::cerr << "Error opening File1\n";
         return -1;
     }
-    std::string_view line, A, B;
+    std::string line;
+    std::string_view A, B;
     while (std::getline(file1, line)) {
         parseLine(line, ',', A, B);
         table1[std::string(A)].Bs.push_back(std::string(B));
