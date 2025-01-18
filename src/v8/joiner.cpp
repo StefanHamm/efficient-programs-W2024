@@ -5,7 +5,6 @@
 #include <vector>
 #include <string>
 #include <algorithm>
-#include <future>
 #include <immintrin.h>
 #include "joiner.h"
 
@@ -46,6 +45,7 @@ void parseLine(const std::string& line, char delimiter, std::string& part1, std:
     }
 }
 
+
 // Function to process a chunk of a file (generic)
 template <typename TableType>
 void processChunk(std::ifstream& file, char delimiter, TableType& table) {
@@ -56,7 +56,7 @@ void processChunk(std::ifstream& file, char delimiter, TableType& table) {
     }
 }
 
-// Function to process chunks of file1 and file2 (specific)
+// Function to process a chunk of file1 and file2 (specific)
 void processChunk(std::ifstream& file1, std::ifstream& file2, char delimiter, std::unordered_map<std::string, Table1Entry>& table1, bool isFirstChunk) {
     std::string line, A, B, C;
     if (isFirstChunk) {
@@ -89,6 +89,7 @@ void processChunk(std::ifstream& file1, std::ifstream& file2, char delimiter, st
 }
 
 
+
 int hashJoin(const std::string& path1, const std::string& path2, const std::string& path3, const std::string& path4) {
     std::unordered_map<std::string, Table1Entry> table1;
     std::unordered_map<std::string, std::vector<std::string>> table3;
@@ -105,36 +106,22 @@ int hashJoin(const std::string& path1, const std::string& path2, const std::stri
         return -1;
     }
 
-    // Lambda function for asynchronous processing of chunks
-    auto processChunksAsync = [&](auto& file, auto& table, char delimiter) {
-        return std::async(std::launch::async, [&](){
-            while(file.peek() != EOF){
-               processChunk(file, delimiter, table);
-           }
-        });
-    };
+     // Process file1 and file2
+    bool isFirstChunk = true;
+    while (file1.peek() != EOF || file2.peek() != EOF) {
+        processChunk(file1, file2, ',', table1, isFirstChunk);
+        isFirstChunk = false;
+    }
 
-    auto processChunkAsync = [&](auto& file1, auto& file2, auto& table1, char delimiter, bool isFirstChunk){
-        return std::async(std::launch::async, [&](){
-            bool lFirstChunk = isFirstChunk;
-            while (file1.peek() != EOF || file2.peek() != EOF) {
-                processChunk(file1, file2, delimiter, table1, lFirstChunk);
-                lFirstChunk = false;
-            }
-        });
-    };
+    // Process file3
+    while (file3.peek() != EOF) {
+        processChunk(file3, ',', table3);
+    }
 
-    // Process file1 and file2 asynchronously
-    auto future1and2 = processChunkAsync(file1, file2, table1, ',', true);
-
-    // Process file3 and file4 asynchronously
-    auto future3 = processChunksAsync(file3, table3, ',');
-    auto future4 = processChunksAsync(file4, table4, ',');
-
-
-    future1and2.get();
-    future3.get();
-    future4.get();
+    // Process file4
+     while (file4.peek() != EOF) {
+        processChunk(file4, ',', table4);
+    }
 
 
     // Perform the join
