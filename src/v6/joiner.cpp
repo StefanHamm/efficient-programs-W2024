@@ -28,9 +28,6 @@ int hashJoin(const std::string& path1, const std::string& path2, const std::stri
     std::unordered_map<std::string, std::vector<std::string>> table4; // Key: D, Values: E's
     table4.reserve(20000000);
 
-
-
-    
     // Read File1 (A,B)
     std::ifstream file1(path1);
     if (!file1.is_open()) {
