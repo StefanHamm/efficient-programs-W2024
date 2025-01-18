@@ -10,9 +10,9 @@ struct Table1Entry {
     std::vector<std::string> Cs;
 };
 
-void parseLine(std::string_view line, char delimiter, std::string_view& part1, std::string_view& part2) {
+void parseLine(const std::string& line, char delimiter, std::string& part1, std::string& part2) {
     size_t delimPos = line.find(delimiter);
-    if (delimPos != std::string_view::npos) {
+    if (delimPos != std::string::npos) {
         part1 = line.substr(0, delimPos);
         part2 = line.substr(delimPos + 1);
     }
@@ -36,7 +36,7 @@ int hashJoin(const std::string& path1, const std::string& path2, const std::stri
         std::cerr << "Error opening File1\n";
         return -1;
     }
-    std::string_view line, A, B;
+    std::string line, A, B;
     while (std::getline(file1, line)) {
         parseLine(line, ',', A, B);
         table1[A].Bs.push_back(B);
@@ -48,7 +48,7 @@ int hashJoin(const std::string& path1, const std::string& path2, const std::stri
         std::cerr << "Error opening File2\n";
         return -1;
     }
-    std::string_view C;
+    std::string C;
     while (std::getline(file2, line)) {
         parseLine(line, ',', A, C);
         table1[A].Cs.push_back(C);
@@ -60,7 +60,7 @@ int hashJoin(const std::string& path1, const std::string& path2, const std::stri
         std::cerr << "Error opening File3\n";
         return -1;
     }
-    std::string_view D;
+    std::string D;
     while (std::getline(file3, line)) {
         parseLine(line, ',', A, D);
         table3[A].push_back(D);
@@ -72,28 +72,23 @@ int hashJoin(const std::string& path1, const std::string& path2, const std::stri
         std::cerr << "Error opening File4\n";
         return -1;
     }
-    std::string_view E;
+    std::string E;
     while (std::getline(file4, line)) {
         parseLine(line, ',', D, E);
         table4[D].push_back(E);
     }
 
     // Perform the join
-    for (const auto& [A, entry] : table1) {
-        if (table3.find(A) != table3.end()) {
-            for (const auto& D : table3[A]) {
-                if (table4.find(D) != table4.end()) {
-                    for (const auto& E : table4[D]) {
-                        for (const auto& B : entry.Bs) {
-                            for (const auto& C : entry.Cs) {
-                                std::cout << D << "," << A << "," << B << "," << C << "," << E << std::endl;
-                            }
-                        }
-                    }
-                }
+    for (size_t i = 0; i < entry.Bs.size(); i += 4) {
+        for (size_t j = 0; j < entry.Cs.size(); j += 4) {
+            for (size_t k = 0; k < 4 && i + k < entry.Bs.size(); ++k) {
+                for (size_t l = 0; l < 4 && j + l < entry.Cs.size(); ++l) {
+                    std::cout << D << "," << A << "," << entry.Bs[i+k] << "," << entry.Cs[j+l] << "," << E << std::endl;
             }
         }
     }
+}
+
 
     return 0;
 }
