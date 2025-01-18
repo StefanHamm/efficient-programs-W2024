@@ -40,7 +40,7 @@ char* mapFile(const std::string& path, size_t& fileSize) {
         return nullptr;
     }
     char* addr = (char*)mmap(nullptr, fileSize, PROT_READ, MAP_PRIVATE, fd, 0);
-    close(fd); // File descriptor is no longer needed after mmap
+    close(fd); 
     if (addr == MAP_FAILED) {
         return nullptr;
     }
@@ -53,8 +53,6 @@ void unmapFile(char* addr, size_t fileSize) {
     }
 }
 
-
-// New parseLine function that operates on memory mapped data
 void parseLineMMAP(const char* data, size_t& pos, size_t fileSize, char delimiter, std::string& part1, std::string& part2) {
     size_t start = pos;
     while (pos < fileSize && data[pos] != delimiter && data[pos] != '\n') {
